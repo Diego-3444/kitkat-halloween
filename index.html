@@ -412,7 +412,9 @@ p{font-size:clamp(1rem,1.65vw,1.6rem);line-height:1.45;}
 <div id="deck">
 
   <!-- ============ 1 · TITLE ============ -->
-  <section class="slide" data-speaker="1">
+  <!-- 'active' is in the markup on purpose: slide 1 must paint on first frame,
+       without waiting on JS or on a CSS transition that may never fire. -->
+  <section class="slide active" data-speaker="1">
     <div class="reveal bar-stage" style="height:clamp(96px,24vh,285px);margin-bottom:1.4rem;">
       <div class="bar" id="bar1"></div>
     </div>
