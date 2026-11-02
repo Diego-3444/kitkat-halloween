@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kit Kat — Break Off the Best Halloween Candy</title>
+<style>
+:root{
+  --kk-red:#D31B23;
+  --kk-red-dark:#8E0F15;
+  --orange:#E65C09;
+  --cream:#F9F9F9;
+  --bg:#09060D;
+  --purple:#2A1240;
+  --purple-lt:#4A1F6B;
+  --wafer:#E8C58A;
+  --wafer-dk:#C49A5C;
+  --choc:#5A3312;
+  --choc-lt:#8A5426;
+  --green:#4ADE80;
+  --head:'Arial Black','Haettenschweiler','Impact','Arial Narrow Bold',sans-serif;
+  --body:'Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  width:100%;height:100%;overflow:hidden;background:var(--bg);
+  color:var(--cream);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;
+}
+body{cursor:default;}
+body.hide-cursor{cursor:none;}
+
+/* ---------- background layers ---------- */
+#fog{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 15%, rgba(74,31,107,.55), transparent 60%),
+    radial-gradient(ellipse 60% 55% at 85% 80%, rgba(211,27,35,.22), transparent 62%),
+    radial-gradient(ellipse 90% 70% at 50% 110%, rgba(230,92,9,.18), transparent 60%);
+  animation:fogDrift 24s ease-in-out infinite alternate;
+}
+@keyframes fogDrift{
+  0%{transform:scale(1) translate(0,0);opacity:.85;}
+  100%{transform:scale(1.18) translate(-3%,2%);opacity:1;}
+}
+#particles{position:fixed;inset:0;z-index:1;pointer-events:none;}
+#vignette{
+  position:fixed;inset:0;z-index:5;pointer-events:none;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,.72) 100%);
+}
+#grain{
+  position:fixed;inset:-50%;z-index:6;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift .6s steps(3) infinite;
+}
+@keyframes grainShift{
+  0%{transform:translate(0,0)}33%{transform:translate(-2%,1%)}66%{transform:translate(1%,-2%)}100%{transform:translate(0,0)}
+}
+
+/* ---------- deck / slides ---------- */
+#deck{
+  position:fixed;inset:0;z-index:3;
+  perspective:1600px;perspective-origin:50% 45%;
+}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:4vh 6vw;
+  transform-style:preserve-3d;
+  opacity:0;pointer-events:none;
+  transform:translateZ(-900px) rotateY(55deg);
+  transition:opacity .62s cubic-bezier(.22,1,.36,1), transform .72s cubic-bezier(.22,1,.36,1);
+}
+.slide.active{opacity:1;pointer-events:auto;transform:translateZ(0) rotateY(0deg);}
+.slide.past{transform:translateZ(-900px) rotateY(-55deg);}
+
+/* staged reveal of children */
+.slide .reveal{opacity:0;transform:translateY(38px) rotateX(-12deg);transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1);}
+.slide.active .reveal{opacity:1;transform:none;}
+.slide.active .reveal:nth-child(1){transition-delay:.18s}
+.slide.active .reveal:nth-child(2){transition-delay:.28s}
+.slide.active .reveal:nth-child(3){transition-delay:.38s}
+.slide.active .reveal:nth-child(4){transition-delay:.48s}
+.slide.active .reveal:nth-child(5){transition-delay:.58s}
+.slide.active .reveal:nth-child(6){transition-delay:.68s}
+
+/* ---------- typography ---------- */
+h1,h2,.kicker,.big{font-family:var(--head);text-transform:uppercase;letter-spacing:-.02em;line-height:.92;}
+h1{font-size:clamp(2.4rem,6.4vw,6.6rem);}
+h2{font-size:clamp(2.1rem,5.4vw,5.2rem);}
+.kicker{
+  font-size:clamp(.8rem,1.35vw,1.2rem);letter-spacing:.42em;
+  color:var(--orange);margin-bottom:1.1rem;font-family:var(--body);font-weight:800;
+}
+.red{color:var(--kk-red);}
+.org{color:var(--orange);}
+.dim{color:#B9AFC4;}
+p{font-size:clamp(1rem,1.65vw,1.6rem);line-height:1.45;}
+.glow{text-shadow:0 0 38px rgba(211,27,35,.55),0 0 90px rgba(211,27,35,.28);}
+.glow-o{text-shadow:0 0 38px rgba(230,92,9,.5),0 0 90px rgba(230,92,9,.25);}
+
+/* ---------- 3D KIT KAT BAR ---------- */
+.bar-stage{
+  perspective:1100px;
+  width:100%;display:flex;align-items:center;justify-content:center;
+}
+.bar{
+  position:relative;transform-style:preserve-3d;
+  animation:barSpin 18s linear infinite;
+  will-change:transform;
+}
+@keyframes barSpin{
+  0%{transform:rotateX(-9deg) rotateY(0deg);}
+  100%{transform:rotateX(-9deg) rotateY(360deg);}
+}
+.bar.slow{animation-duration:30s;}
+.finger{
+  position:absolute;transform-style:preserve-3d;
+  transition:transform 1.05s cubic-bezier(.34,1.56,.64,1);
+}
+.face{position:absolute;backface-visibility:hidden;}
+.face.fr,.face.bk{
+  background:linear-gradient(100deg,#2B1708 0%, #6B3F18 18%, #8A5426 38%, #5A3312 62%, #351D09 85%, #221105 100%);
+  box-shadow:inset 0 0 30px rgba(0,0,0,.62);
+}
+.face.lt,.face.rt{
+  background:linear-gradient(180deg,#4A2A0D 0%, #1E0F04 100%);
+}
+.face.tp{background:linear-gradient(180deg,#5A3312,#2E1806);}
+.face.bt{background:#190C03;}
+/* debossed logo on front face */
+.emboss{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--head);color:rgba(28,14,4,.55);
+  text-shadow:0 1px 0 rgba(255,220,170,.16), 0 -1px 1px rgba(0,0,0,.7);
+  transform:rotate(-90deg);letter-spacing:.12em;white-space:nowrap;
+}
+/* glossy sweep — narrow specular highlight, like tempered chocolate */
+.sheen{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(100deg,transparent 26%,rgba(255,232,200,.13) 34%,transparent 44%),
+    linear-gradient(90deg,rgba(255,255,255,.09) 0 2%,transparent 6%),
+    linear-gradient(270deg,rgba(0,0,0,.45) 0 7%,transparent 16%);
+}
+/* wafer layers visible on the broken end */
+.wafer-end{
+  position:absolute;display:flex;flex-direction:column;
+  background:var(--choc);overflow:hidden;
+}
+.wafer-end i{flex:1;display:block;}
+.wafer-end i:nth-child(odd){background:linear-gradient(90deg,#C9A063,#9A7540);}
+.wafer-end i:nth-child(even){background:linear-gradient(90deg,#7E5428,#4E320F);}
+.wafer-end::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 7px rgba(0,0,0,.85);}
+
+/* snapped state — offsets scale with the bar (--sA/--sB/--sz set in JS) */
+.bar.snapped .finger:nth-child(1){transform:translateX(calc(-1 * var(--sA))) translateZ(var(--sz))  rotateZ(-15deg) rotateY(-20deg);}
+.bar.snapped .finger:nth-child(2){transform:translateX(calc(-1 * var(--sB))) translateZ(calc(-1 * var(--sz) * .25)) rotateZ(-5deg);}
+.bar.snapped .finger:nth-child(3){transform:translateX(var(--sB))            translateZ(calc(-1 * var(--sz) * .25)) rotateZ(5deg);}
+.bar.snapped .finger:nth-child(4){transform:translateX(var(--sA))            translateZ(var(--sz))  rotateZ(15deg)  rotateY(20deg);}
+
+/* ---------- comparison cards ---------- */
+.cards{
+  display:flex;gap:clamp(1rem,2.6vw,2.6rem);justify-content:center;align-items:stretch;
+  flex-wrap:wrap;perspective:1500px;width:100%;
+}
+.card{
+  flex:1 1 260px;max-width:360px;min-width:235px;
+  background:linear-gradient(170deg,rgba(255,255,255,.085),rgba(255,255,255,.022));
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:20px;padding:clamp(1rem,1.9vw,1.9rem);
+  transform-style:preserve-3d;
+  transition:transform .55s cubic-bezier(.22,1,.36,1), box-shadow .55s ease, border-color .55s ease;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 26px 60px rgba(0,0,0,.5);
+}
+.card:hover{transform:translateZ(60px) rotateX(5deg) scale(1.035);}
+.card.win{
+  border-color:var(--kk-red);
+  box-shadow:0 0 0 1px var(--kk-red),0 24px 70px rgba(211,27,35,.42),0 0 110px rgba(211,27,35,.22);
+  transform:translateZ(50px) scale(1.05);
+}
+.card.win:hover{transform:translateZ(90px) rotateX(5deg) scale(1.08);}
+.card h3{font-family:var(--head);text-transform:uppercase;font-size:clamp(1.15rem,2.1vw,1.9rem);margin-bottom:.9rem;letter-spacing:-.01em;}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:.42rem .7rem;font-size:clamp(.78rem,1.03vw,1rem);}
+.card dt{color:var(--orange);font-weight:800;text-transform:uppercase;font-size:.72em;letter-spacing:.06em;align-self:center;}
+.card dd{color:#E4DDEC;line-height:1.3;}
+.badge{
+  display:inline-block;margin-top:1rem;padding:.3rem .8rem;border-radius:999px;
+  font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+}
+.badge.hi{background:var(--kk-red);color:#fff;box-shadow:0 0 26px rgba(211,27,35,.6);}
+.badge.mid{background:rgba(255,255,255,.1);color:#C9BFD4;}
+
+/* ---------- reason layout ---------- */
+.split{
+  display:flex;align-items:center;justify-content:center;
+  gap:clamp(1.5rem,4vw,5rem);width:100%;flex-wrap:wrap;
+}
+.col{flex:1 1 380px;min-width:300px;max-width:720px;}
+.points{list-style:none;margin-top:1.4rem;}
+.points li{
+  position:relative;padding-left:2.4rem;margin-bottom:1.05rem;
+  font-size:clamp(.95rem,1.45vw,1.42rem);line-height:1.4;color:#E4DDEC;
+}
+.points li::before{
+  content:'';position:absolute;left:0;top:.42em;
+  width:1.05rem;height:1.05rem;border-radius:3px;
+  background:linear-gradient(135deg,var(--kk-red),var(--orange));
+  box-shadow:0 0 18px rgba(230,92,9,.55);
+  transform:rotate(45deg);
+}
+.points li b{color:#fff;}
+.evi{
+  margin-top:1.5rem;padding:1.05rem 1.3rem;
+  border-left:4px solid var(--orange);
+  background:linear-gradient(90deg,rgba(230,92,9,.17),transparent);
+  border-radius:0 12px 12px 0;
+  font-size:clamp(.88rem,1.3vw,1.26rem);line-height:1.45;
+}
+.evi strong{color:var(--orange);letter-spacing:.1em;font-size:.78em;display:block;margin-bottom:.35rem;text-transform:uppercase;}
+
+/* ---------- wafer cross-section (reason 1) ---------- */
+.xsec{perspective:900px;display:flex;justify-content:center;}
+.xsec-inner{
+  transform-style:preserve-3d;
+  transform:rotateX(14deg) rotateY(-26deg);
+  animation:xsecFloat 7s ease-in-out infinite alternate;
+  display:flex;flex-direction:column;gap:4px;
+  padding:16px;border-radius:12px;
+  background:linear-gradient(160deg,#6B3D16,#2A1606);
+  box-shadow:0 40px 90px rgba(0,0,0,.6), inset 0 0 40px rgba(0,0,0,.5);
+}
+@keyframes xsecFloat{
+  0%{transform:rotateX(14deg) rotateY(-26deg) translateY(0);}
+  100%{transform:rotateX(9deg) rotateY(-14deg) translateY(-16px);}
+}
+.layer{
+  width:clamp(170px,19vw,300px);border-radius:4px;
+  display:flex;align-items:center;padding-left:12px;
+  font-size:clamp(.6rem,.82vw,.8rem);font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+}
+.layer.c{height:clamp(14px,1.7vw,22px);background:linear-gradient(90deg,#8A5426,#4A2A0D);color:rgba(255,255,255,.5);}
+.layer.w{height:clamp(22px,2.6vw,34px);background:linear-gradient(90deg,var(--wafer),var(--wafer-dk));color:rgba(90,51,18,.75);}
+.snapline{
+  text-align:center;margin-top:1.1rem;font-family:var(--head);
+  font-size:clamp(1rem,1.9vw,1.8rem);color:var(--orange);
+  animation:snapPulse 2.1s ease-in-out infinite;
+}
+@keyframes snapPulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.07);}}
+
+/* ---------- bats (reason 3) ---------- */
+.bat{position:absolute;pointer-events:none;z-index:2;will-change:transform;}
+.bat .wing{
+  display:inline-block;width:0;height:0;
+  border-style:solid;
+  animation:flap .36s ease-in-out infinite alternate;
+}
+@keyframes flap{0%{transform:scaleY(1) }100%{transform:scaleY(.35)}}
+
+/* ---------- rank chart (article slide) ---------- */
+.rank{width:100%;max-width:980px;margin-top:1.1rem;}
+.row{
+  display:flex;align-items:center;gap:1rem;margin-bottom:.62rem;
+  font-size:clamp(.82rem,1.22vw,1.2rem);
+}
+.row .n{
+  width:2.2em;height:2.2em;flex:none;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--head);background:rgba(255,255,255,.09);color:#C9BFD4;
+}
+.row .track{flex:1;height:clamp(22px,2.5vw,34px);background:rgba(255,255,255,.055);border-radius:8px;overflow:hidden;}
+.row .fill{
+  height:100%;width:0;border-radius:8px;
+  background:linear-gradient(90deg,#4A2A0D,#8A5426);
+  display:flex;align-items:center;padding-left:1rem;
+  font-weight:700;color:rgba(255,255,255,.82);white-space:nowrap;
+  transition:width 1.05s cubic-bezier(.22,1,.36,1);
+}
+.slide.active .row .fill{width:var(--w);}
+.row:nth-child(1) .fill{transition-delay:.25s}
+.row:nth-child(2) .fill{transition-delay:.35s}
+.row:nth-child(3) .fill{transition-delay:.45s}
+.row:nth-child(4) .fill{transition-delay:.55s}
+.row:nth-child(5) .fill{transition-delay:.65s}
+.row:nth-child(6) .fill{transition-delay:.75s}
+.row.me .n{background:var(--kk-red);color:#fff;box-shadow:0 0 24px rgba(211,27,35,.65);}
+.row.me .fill{background:linear-gradient(90deg,var(--kk-red-dark),var(--kk-red));color:#fff;box-shadow:0 0 34px rgba(211,27,35,.5);}
+.srcbox{
+  margin-top:1.6rem;padding:1rem 1.3rem;border-radius:14px;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
+  font-size:clamp(.74rem,1.02vw,1rem);line-height:1.5;
+}
+.srcbox a{color:var(--orange);word-break:break-all;}
+
+/* ---------- flip cards (counterargument) ---------- */
+.flips{display:flex;gap:clamp(.9rem,2vw,2rem);justify-content:center;flex-wrap:wrap;perspective:1600px;width:100%;}
+.flip{flex:1 1 270px;max-width:340px;min-width:240px;height:clamp(230px,27vh,300px);transform-style:preserve-3d;transition:transform .8s cubic-bezier(.22,1,.36,1);cursor:pointer;}
+.flip.flipped{transform:rotateY(180deg);}
+.flip .side{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;
+  padding:clamp(1rem,1.7vw,1.7rem);display:flex;flex-direction:column;justify-content:center;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 24px 56px rgba(0,0,0,.5);
+}
+.flip .front{background:linear-gradient(165deg,rgba(211,27,35,.22),rgba(211,27,35,.06));border-color:rgba(211,27,35,.5);}
+.flip .back{background:linear-gradient(165deg,rgba(74,222,128,.17),rgba(74,222,128,.04));border-color:rgba(74,222,128,.45);transform:rotateY(180deg);}
+.flip .num{font-family:var(--head);font-size:2.4rem;color:var(--orange);line-height:1;margin-bottom:.5rem;}
+.flip .lbl{font-size:.68rem;letter-spacing:.24em;font-weight:800;text-transform:uppercase;margin-bottom:.6rem;}
+.flip .front .lbl{color:var(--kk-red);}
+.flip .back .lbl{color:var(--green);}
+.flip p{font-size:clamp(.8rem,1.08vw,1.04rem);line-height:1.38;}
+.hintflip{margin-top:1.3rem;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:#7D6F8C;}
+
+/* ---------- objection banner ---------- */
+.objection{
+  max-width:1000px;padding:1.2rem 1.8rem;border-radius:16px;margin-bottom:1.8rem;
+  background:linear-gradient(135deg,rgba(211,27,35,.22),rgba(211,27,35,.05));
+  border:1px solid rgba(211,27,35,.45);
+  font-size:clamp(.95rem,1.55vw,1.55rem);font-style:italic;line-height:1.4;text-align:center;
+}
+.objection span{display:block;font-style:normal;font-size:.62em;letter-spacing:.26em;text-transform:uppercase;color:var(--kk-red);margin-bottom:.5rem;font-weight:800;}
+
+/* ---------- crown finale ---------- */
+.crown{
+  font-size:clamp(4rem,11vw,10rem);line-height:1;
+  animation:crownFloat 3.6s ease-in-out infinite;
+  filter:drop-shadow(0 0 50px rgba(255,190,60,.75));
+}
+@keyframes crownFloat{0%,100%{transform:translateY(0) rotate(-4deg) scale(1);}50%{transform:translateY(-26px) rotate(4deg) scale(1.07);}}
+.finalpts{display:flex;gap:clamp(1rem,3vw,3.4rem);flex-wrap:wrap;justify-content:center;margin:2rem 0;}
+.fp{text-align:center;max-width:250px;}
+.fp .t{font-family:var(--head);font-size:clamp(1rem,1.75vw,1.65rem);color:var(--orange);margin-bottom:.3rem;text-transform:uppercase;}
+.fp .d{font-size:clamp(.78rem,1.06vw,1.02rem);color:#C9BFD4;line-height:1.35;}
+.kicker-line{
+  font-family:var(--head);font-size:clamp(1.3rem,3.1vw,3rem);
+  margin-top:.6rem;line-height:1.1;text-transform:uppercase;
+}
+
+/* ---------- names ---------- */
+.names{
+  display:flex;gap:clamp(.6rem,1.6vw,1.6rem);flex-wrap:wrap;justify-content:center;margin-top:2rem;
+}
+.names span{
+  padding:.52rem 1.25rem;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.17);
+  font-size:clamp(.78rem,1.08vw,1.05rem);font-weight:700;letter-spacing:.05em;
+}
+.names span.ph{border-style:dashed;color:#8E7F9C;}
+
+/* ---------- chrome: progress, nav, notes, timer ---------- */
+#progress{
+  position:fixed;bottom:0;left:0;height:4px;z-index:20;width:0;
+  background:linear-gradient(90deg,var(--kk-red),var(--orange));
+  box-shadow:0 0 22px rgba(230,92,9,.85);
+  transition:width .55s cubic-bezier(.22,1,.36,1);
+}
+#dots{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:21;display:flex;gap:9px;}
+#dots i{
+  width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);
+  cursor:pointer;transition:all .3s ease;display:block;
+}
+#dots i.on{background:var(--kk-red);width:26px;border-radius:5px;box-shadow:0 0 16px rgba(211,27,35,.85);}
+#counter{
+  position:fixed;bottom:18px;right:26px;z-index:21;
+  font-family:var(--head);font-size:1rem;color:#5E5270;letter-spacing:.1em;
+}
+#counter b{color:var(--cream);}
+#timer{
+  position:fixed;top:18px;right:26px;z-index:21;
+  font-family:var(--head);font-size:1.6rem;letter-spacing:.06em;
+  color:#5E5270;opacity:0;transition:opacity .3s ease;
+}
+#timer.on{opacity:1;color:var(--cream);}
+#timer.good{color:var(--green);}
+#timer.over{color:var(--kk-red);animation:snapPulse 1s infinite;}
+#hint{
+  position:fixed;bottom:18px;left:26px;z-index:21;
+  font-size:.72rem;letter-spacing:.17em;text-transform:uppercase;color:#4D4360;
+  transition:opacity .5s ease;
+}
+#notes{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:46vh;overflow-y:auto;
+  background:rgba(8,5,12,.97);border-top:2px solid var(--kk-red);
+  padding:1.6rem 2.4rem 2.4rem;
+  transform:translateY(102%);transition:transform .45s cubic-bezier(.22,1,.36,1);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+#notes.on{transform:translateY(0);}
+#notes h4{font-family:var(--head);color:var(--orange);letter-spacing:.14em;margin-bottom:.9rem;font-size:1rem;text-transform:uppercase;}
+#notes .script{font-size:1.02rem;line-height:1.62;color:#DED6E6;white-space:pre-wrap;max-width:1100px;}
+#notes .script em{color:var(--orange);font-style:normal;font-weight:700;}
+#notes .tip{margin-top:1rem;font-size:.86rem;color:#8E7F9C;border-left:3px solid #4D4360;padding-left:.9rem;line-height:1.5;}
+
+@media (max-width:760px){
+  .slide{padding:3vh 5vw;}
+  .split{gap:1.6rem;}
+  #hint{display:none;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.15s !important;}
+}
+</style>
+</head>
+<body>
+
+<div id="fog"></div>
+<canvas id="particles"></canvas>
+<div id="vignette"></div>
+<div id="grain"></div>
+
+<div id="deck">
+
+  <!-- ============ 1 · TITLE ============ -->
+  <section class="slide" data-speaker="1">
+    <div class="reveal bar-stage" style="height:clamp(96px,24vh,285px);margin-bottom:1.4rem;">
+      <div class="bar" id="bar1"></div>
+    </div>
+    <h1 class="reveal glow" style="text-align:center;">
+      KIT&nbsp;KAT<br><span class="red">BREAK OFF</span><br>
+      <span style="font-size:.38em;letter-spacing:.04em;">THE BEST HALLOWEEN CANDY</span>
+    </h1>
+    <p class="reveal" style="max-width:900px;text-align:center;margin-top:1.2rem;color:#D6CEE0;">
+      <b class="org">OUR CLAIM:</b> Kit Kat is the best Halloween candy because it is the only
+      top-ranked candy that delivers <b>two textures in one bar</b>, <b>shares perfectly</b>,
+      and <b>has its own Halloween costume</b>.
+    </p>
+    <div class="reveal names" style="margin-top:1.3rem;">
+      <span>Diego Esquivel Martínez</span>
+      <span>Adiel Santiago Rovira Ochoa</span>
+      <span>Oziel Alejandro Hernández Serrato</span>
+    </div>
+    <p class="reveal dim" style="margin-top:1.1rem;font-size:.82rem;letter-spacing:.26em;text-transform:uppercase;">
+      English Class · Halloween Candy Crown · November 2026
+    </p>
+  </section>
+
+  <!-- ============ 2 · COMPARISON ============ -->
+  <section class="slide" data-speaker="1">
+    <div class="reveal" style="text-align:center;margin-bottom:2rem;">
+      <div class="kicker">Step 1 — We Compared Three</div>
+      <h2>WE PUT THEM <span class="red">HEAD TO HEAD</span></h2>
+    </div>
+    <div class="reveal cards">
+      <div class="card win">
+        <h3 class="red">Kit Kat</h3>
+        <dl>
+          <dt>Flavor</dt><dd>Sweet milk chocolate — light, never heavy</dd>
+          <dt>Texture</dt><dd><b>Crisp wafer + smooth chocolate</b> (two textures)</dd>
+          <dt>Look</dt><dd>Four clean fingers, bright red wrapper</dd>
+          <dt>Halloween</dt><dd>Official spooky bars every year</dd>
+        </dl>
+        <span class="badge hi">High appeal ✦ winner</span>
+      </div>
+      <div class="card">
+        <h3>Reese's Cups</h3>
+        <dl>
+          <dt>Flavor</dt><dd>Strong, salty peanut butter</dd>
+          <dt>Texture</dt><dd>Soft and dense — <b>one texture only</b></dd>
+          <dt>Look</dt><dd>Round brown cup</dd>
+          <dt>Halloween</dt><dd>Melts in a warm candy bag</dd>
+        </dl>
+        <span class="badge mid">Medium appeal</span>
+      </div>
+      <div class="card">
+        <h3>Sour Patch Kids</h3>
+        <dl>
+          <dt>Flavor</dt><dd>Intense sour, then sweet</dd>
+          <dt>Texture</dt><dd>Chewy and sticky</dd>
+          <dt>Look</dt><dd>Small sugar-coated figures</dd>
+          <dt>Halloween</dt><dd>Fun colors, but no chocolate</dd>
+        </dl>
+        <span class="badge mid">Medium appeal</span>
+      </div>
+    </div>
+    <p class="reveal" style="margin-top:2rem;text-align:center;">
+      Kit Kat is the <b class="org">only one</b> that scores high in <b>all four</b> categories.
+    </p>
+  </section>
+
+  <!-- ============ 3 · REASON 1 ============ -->
+  <section class="slide" data-speaker="2">
+    <div class="reveal split">
+      <div class="col">
+        <div class="kicker">Reason 1</div>
+        <h2>TWO TEXTURES<br><span class="red">IN ONE BITE</span></h2>
+        <ul class="points">
+          <li>Every other top candy gives you <b>one</b> texture: soft, chewy, or hard.</li>
+          <li>Kit Kat gives you a <b>crisp wafer snap</b> AND <b>smooth chocolate</b> at the same time.</li>
+          <li>You can eat four Kit Kats and still want more. <b>Try that with Sour Patch Kids.</b></li>
+        </ul>
+        <div class="evi">
+          <strong>Evidence · Instacart 2026</strong>
+          Chocolate owns the first <b>six</b> spots of the top 10 — and Kit Kat is the
+          <b class="org">only crispy wafer bar</b> in that group. It has no competition on texture.
+        </div>
+      </div>
+      <div class="col" style="flex:0 1 420px;">
+        <div class="xsec">
+          <div class="xsec-inner">
+            <div class="layer c">chocolate</div>
+            <div class="layer w">wafer</div>
+            <div class="layer c">cream</div>
+            <div class="layer w">wafer</div>
+            <div class="layer c">cream</div>
+            <div class="layer w">wafer</div>
+            <div class="layer c">chocolate</div>
+          </div>
+        </div>
+        <div class="snapline">★ SNAP ★</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · REASON 2 (SNAP) ============ -->
+  <section class="slide" id="s4" data-speaker="2">
+    <div class="reveal split">
+      <div class="col" style="flex:0 1 480px;display:flex;flex-direction:column;align-items:center;">
+        <div class="bar-stage" style="height:clamp(150px,42vh,440px);">
+          <div class="bar slow" id="bar4"></div>
+        </div>
+        <p class="dim" style="margin-top:1.6rem;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;text-align:center;">
+          ↵ press ENTER or click the bar to snap it
+        </p>
+      </div>
+      <div class="col" style="max-width:620px;">
+        <div class="kicker">Reason 2</div>
+        <h2>BUILT TO BE<br><span class="red">SHARED</span></h2>
+        <ul class="points">
+          <li>Kit Kat is the <b>only candy engineered to be divided</b> — four fingers, no knife, no mess.</li>
+          <li><b>One bar = four trick-or-treaters.</b> You cannot split a Reese's Cup evenly.</li>
+          <li>Halloween is a <b>social holiday</b> — the candy you trade is the candy they remember.</li>
+        </ul>
+        <div class="evi">
+          <strong>Evidence · Hershey 2026 Halloween line</strong>
+          Hershey sells Kit Kat in <b class="org">"breakaway shapes."</b>
+          The brand itself markets <b>breaking and sharing</b> as the whole point.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · REASON 3 ============ -->
+  <section class="slide" id="s5" data-speaker="3">
+    <div class="reveal" style="text-align:center;margin-bottom:1.6rem;">
+      <div class="kicker">Reason 3</div>
+      <h2>KIT KAT <span class="red">OWNS HALLOWEEN</span></h2>
+    </div>
+    <div class="reveal split" style="align-items:stretch;">
+      <div class="col" style="max-width:560px;">
+        <ul class="points">
+          <li>Kit Kat is the <b>only candy Hershey gives actual Halloween characters to.</b></li>
+          <li>No other candy gets costumes. Reese's changes <b>shape</b>; Kit Kat changes <b>character</b>.</li>
+          <li>Halloween appeal isn't just taste — it's <b>whether the candy belongs to the holiday.</b></li>
+        </ul>
+      </div>
+      <div class="col" style="max-width:520px;display:flex;flex-direction:column;justify-content:center;gap:1rem;">
+        <div class="evi" style="margin-top:0;">
+          <strong>Evidence · Halloween 2026</strong>
+          Hershey released <b class="org">"Kit Kat Count &amp; Witch"</b> — the vampire Count returns,
+          now joined by a <b>brand-new Witch</b>.
+        </div>
+        <div class="evi" style="margin-top:0;">
+          <strong>Evidence · Limited edition</strong>
+          They also launched <b class="org">"Kit Kat Ghost Toast,"</b> a cinnamon-toast flavor,
+          in the Halloween All-Stars box.
+        </div>
+      </div>
+    </div>
+    <p class="reveal" style="margin-top:1.8rem;text-align:center;font-family:var(--head);font-size:clamp(1rem,2.2vw,2rem);text-transform:uppercase;">
+      🦇 The Count. 🧙 The Witch. <span class="red">Nobody else gets a costume.</span>
+    </p>
+  </section>
+
+  <!-- ============ 6 · ARTICLE ============ -->
+  <section class="slide" data-speaker="3">
+    <div class="reveal" style="text-align:center;margin-bottom:1.2rem;">
+      <div class="kicker">Step 2 — Article Evidence</div>
+      <h2>CHOCOLATE <span class="red">STILL RULES</span></h2>
+    </div>
+    <div class="reveal rank">
+      <div class="row"><span class="n">1</span><div class="track"><div class="fill" style="--w:100%">Reese's Peanut Butter Cups</div></div></div>
+      <div class="row"><span class="n">2</span><div class="track"><div class="fill" style="--w:91%">Peanut M&amp;M's</div></div></div>
+      <div class="row"><span class="n">3</span><div class="track"><div class="fill" style="--w:83%">Hershey's Milk Chocolate</div></div></div>
+      <div class="row"><span class="n">4</span><div class="track"><div class="fill" style="--w:76%">M&amp;M's</div></div></div>
+      <div class="row"><span class="n">5</span><div class="track"><div class="fill" style="--w:70%">Snickers</div></div></div>
+      <div class="row me"><span class="n">6</span><div class="track"><div class="fill" style="--w:64%">KIT KAT ← us, and still all chocolate</div></div></div>
+    </div>
+    <p class="reveal" style="margin-top:1.4rem;max-width:1000px;text-align:center;">
+      <b class="org">IN OUR OWN WORDS:</b> sour and chewy candies are trending right now — but Americans
+      <b>still put chocolate in every single one of the top six spots.</b> Kit Kat is inside that locked
+      chocolate group. Out of hundreds of candies sold in this country, Kit Kat finishes ahead of
+      <b class="red">every sour, gummy, and fruity candy there is.</b>
+    </p>
+    <div class="reveal srcbox">
+      <b>SOURCE:</b> "Reese's Peanut Butter Cups Named America's Favorite Halloween Candy Again in 2026,"
+      AOL, Sept. 30, 2026 — reporting Instacart's national candy data.<br>
+      <a href="https://www.aol.com/articles/reeses-peanut-butter-cups-named-160014000.html" target="_blank" rel="noopener">https://www.aol.com/articles/reeses-peanut-butter-cups-named-160014000.html</a>
+    </div>
+  </section>
+
+  <!-- ============ 7 · COUNTERARGUMENT ============ -->
+  <section class="slide" id="s7" data-speaker="4">
+    <div class="reveal" style="text-align:center;margin-bottom:.4rem;">
+      <div class="kicker">Step 3 — Counterargument</div>
+      <h2>THEY SAY… <span class="red">WE ANSWER</span></h2>
+    </div>
+    <div class="reveal objection">
+      <span>The strongest objection</span>
+      "Kit Kat is only #6, and it dropped from #4 last year. That means it's losing."
+    </div>
+    <div class="reveal flips">
+      <div class="flip">
+        <div class="side front">
+          <div class="num">01</div>
+          <div class="lbl">The ranking</div>
+          <p>"Sixth place isn't impressive. Five candies beat it."</p>
+        </div>
+        <div class="side back">
+          <div class="lbl">Our answer</div>
+          <p><b>#6 out of hundreds of candies is elite.</b> Kit Kat still beats Twix, Skittles,
+          Sour Patch Kids, and every non-chocolate candy on the list.</p>
+        </div>
+      </div>
+      <div class="flip">
+        <div class="side front">
+          <div class="num">02</div>
+          <div class="lbl">The data</div>
+          <p>"The numbers say Americans prefer other candy."</p>
+        </div>
+        <div class="side back">
+          <div class="lbl">Our answer — strongest</div>
+          <p><b>Look at the method.</b> That ranking comes from Instacart <b>grocery orders</b>
+          placed in October 2025. It measures what <b>adults bulk-buy online</b> — not what
+          <b>kids actually want in the bag.</b></p>
+        </div>
+      </div>
+      <div class="flip">
+        <div class="side front">
+          <div class="num">03</div>
+          <div class="lbl">The trend</div>
+          <p>"Dropping two spots means the brand is shrinking."</p>
+        </div>
+        <div class="side back">
+          <div class="lbl">Our answer</div>
+          <p><b>Two spots in a crowded top 10 is noise, not a trend.</b> And Kit Kat is the only
+          top-10 candy that got a brand-new Halloween character in 2026. That's a brand
+          <b>growing.</b></p>
+        </div>
+      </div>
+    </div>
+    <div class="reveal hintflip">↵ press ENTER or click a card to reveal our answer</div>
+  </section>
+
+  <!-- ============ 8 · CROWN ============ -->
+  <section class="slide" id="s8" data-speaker="4">
+    <div class="reveal crown">👑</div>
+    <h1 class="reveal glow" style="text-align:center;margin-top:.8rem;">
+      GIVE KIT KAT<br><span class="red">THE CROWN</span>
+    </h1>
+    <div class="reveal finalpts">
+      <div class="fp"><div class="t">Best Texture</div><div class="d">The only crisp wafer in the top 6.</div></div>
+      <div class="fp"><div class="t">Best to Share</div><div class="d">Four fingers, built to break.</div></div>
+      <div class="fp"><div class="t">Best Halloween ID</div><div class="d">The Count AND the Witch.</div></div>
+    </div>
+    <div class="reveal kicker-line" style="text-align:center;">
+      Reese's wins the <span class="dim">grocery list</span>.<br>
+      <span class="red glow">Kit Kat wins Halloween night.</span>
+    </div>
+    <p class="reveal" style="margin-top:2rem;text-align:center;color:#9E92AC;">
+      Thank you — <b class="org">what questions do you have?</b>
+    </p>
+  </section>
+
+</div>
+
+<div id="progress"></div>
+<div id="dots"></div>
+<div id="counter"><b>1</b> / 8</div>
+<div id="timer">0:00</div>
+<div id="hint">← → navigate · N notes · T timer · F fullscreen</div>
+
+<div id="notes">
+  <h4 id="notesTitle">Speaker notes</h4>
+  <div class="script" id="notesBody"></div>
+  <div class="tip" id="notesTip"></div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   1. BUILD THE 3D KIT KAT BARS
+   ============================================================ */
+/* targetH = how tall the bar should be on screen, in px.
+   Proportions follow a real 4-finger Kit Kat (~1.6 : 1 tall-to-wide). */
+function buildBar(host, targetH){
+  const H = targetH, W = H*0.142, D = H*0.052, GAP = H*0.019;
+  const total = 4*W + 3*GAP;
+  host.style.width  = total + 'px';
+  host.style.height = H + 'px';
+  // how far each finger travels when the bar snaps apart
+  host.style.setProperty('--sA', (W*2.5) + 'px');
+  host.style.setProperty('--sB', (W*0.85) + 'px');
+  host.style.setProperty('--sz', (W*1.1) + 'px');
+
+  for(let i=0;i<4;i++){
+    const f = document.createElement('div');
+    f.className = 'finger';
+    f.style.width = W+'px'; f.style.height = H+'px';
+    f.style.left = (i*(W+GAP)) + 'px';
+    f.style.top = '0';
+
+    // every face is centred on the finger, then pushed out along its own axis
+    const mk = (cls, w, h, tf) => {
+      const e = document.createElement('div');
+      e.className = 'face ' + cls;
+      Object.assign(e.style, {
+        width:w+'px', height:h+'px',
+        left:'50%', top:'50%',
+        marginLeft:(-w/2)+'px', marginTop:(-h/2)+'px',
+        transform:tf
+      });
+      f.appendChild(e);
+      return e;
+    };
+    const fr = mk('fr', W, H, `translateZ(${D/2}px)`);
+                mk('bk', W, H, `rotateY(180deg) translateZ(${D/2}px)`);
+                mk('rt', D, H, `rotateY(90deg)   translateZ(${W/2}px)`);
+                mk('lt', D, H, `rotateY(-90deg)  translateZ(${W/2}px)`);
+    // top = wafer cross-section (the "broken" end)
+    const tp = mk('tp', W, D, `rotateX(90deg)  translateZ(${H/2}px)`);
+                mk('bt', W, D, `rotateX(-90deg) translateZ(${H/2}px)`);
+
+    // wafer layers on the top face
+    const we = document.createElement('div');
+    we.className = 'wafer-end';
+    Object.assign(we.style,{inset:'0',position:'absolute'});
+    for(let k=0;k<7;k++) we.appendChild(document.createElement('i'));
+    tp.appendChild(we);
+
+    // embossed wordmark + gloss on the front
+    const em = document.createElement('div');
+    em.className = 'emboss';
+    em.style.fontSize = (W*0.34)+'px';
+    em.textContent = 'KIT KAT';
+    fr.appendChild(em);
+    const sh = document.createElement('div');
+    sh.className = 'sheen';
+    fr.appendChild(sh);
+
+    host.appendChild(f);
+  }
+}
+const bar1 = document.getElementById('bar1');
+const bar4 = document.getElementById('bar4');
+const vh = window.innerHeight, vw = window.innerWidth;
+const fit = (pct,min,max) => Math.max(min, Math.min(max, vh*pct, vw*0.26));
+buildBar(bar1, fit(0.24, 96, 285));
+buildBar(bar4, Math.max(150, Math.min(440, vh*0.42, vw*0.30)));
+
+/* snap interaction on slide 4 */
+function toggleSnap(){
+  bar4.classList.toggle('snapped');
+  if(bar4.classList.contains('snapped')) burst(window.innerWidth/2, window.innerHeight*0.42, 46);
+}
+bar4.addEventListener('click', toggleSnap);
+
+/* ============================================================
+   2. PARTICLE FIELD  (embers + floating candy + bats)
+   ============================================================ */
+const cv  = document.getElementById('particles');
+const ctx = cv.getContext('2d');
+let CW=0, CH=0, DPR=Math.min(window.devicePixelRatio||1, 2);
+
+function resize(){
+  CW = cv.clientWidth; CH = cv.clientHeight;
+  cv.width = CW*DPR; cv.height = CH*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', resize);
+
+const EMBER_COLORS = ['#E65C09','#D31B23','#FFB347','#8A5426','#FFD98A'];
+let embers = [], confetti = [], bats = [];
+
+function makeEmbers(n){
+  embers = [];
+  for(let i=0;i<n;i++){
+    embers.push({
+      x: Math.random()*CW,
+      y: Math.random()*CH,
+      z: 0.25 + Math.random()*0.95,          // depth → parallax + size
+      r: 0.9 + Math.random()*2.6,
+      vy: -(0.12 + Math.random()*0.5),
+      vx: (Math.random()-0.5)*0.26,
+      a: 0.12 + Math.random()*0.5,
+      tw: Math.random()*Math.PI*2,
+      c: EMBER_COLORS[(Math.random()*EMBER_COLORS.length)|0]
+    });
+  }
+}
+
+/* little 3D-ish spinning candy bars drifting in the background */
+let candies = [];
+function makeCandies(n){
+  candies = [];
+  for(let i=0;i<n;i++){
+    candies.push({
+      x: Math.random()*CW, y: Math.random()*CH,
+      z: .3+Math.random()*.8,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-.5)*0.012,
+      vy: -(0.1+Math.random()*0.3),
+      vx: (Math.random()-.5)*0.2,
+      w: 10+Math.random()*16,
+      a: .05+Math.random()*.14
+    });
+  }
+}
+
+function makeBats(n){
+  bats = [];
+  for(let i=0;i<n;i++){
+    bats.push({
+      x: Math.random()*CW, y: Math.random()*CH*.75,
+      vx: (Math.random()<.5?-1:1)*(0.35+Math.random()*0.75),
+      amp: 18+Math.random()*44, ph: Math.random()*Math.PI*2,
+      sp: 0.012+Math.random()*0.03,
+      s: 0.5+Math.random()*1.0,
+      a: 0.16+Math.random()*0.42
+    });
+  }
+}
+
+function burst(x,y,n){
+  for(let i=0;i<n;i++){
+    const ang = Math.random()*Math.PI*2, spd = 2+Math.random()*9;
+    confetti.push({
+      x, y,
+      vx: Math.cos(ang)*spd,
+      vy: Math.sin(ang)*spd - 3,
+      g: 0.16+Math.random()*0.14,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-.5)*0.4,
+      w: 5+Math.random()*11,
+      h: 3+Math.random()*7,
+      life: 1,
+      decay: 0.006+Math.random()*0.012,
+      c: EMBER_COLORS[(Math.random()*EMBER_COLORS.length)|0]
+    });
+  }
+}
+
+function drawBat(b){
+  const s = b.s, y = b.y + Math.sin(b.ph)*b.amp;
+  const flap = Math.abs(Math.sin(b.ph*3.2));
+  ctx.save();
+  ctx.translate(b.x, y);
+  ctx.scale(s * (b.vx<0?-1:1), s);
+  ctx.globalAlpha = b.a;
+  ctx.fillStyle = '#120A1C';
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.quadraticCurveTo(-9, -7*flap-2, -20, -2-6*flap);
+  ctx.quadraticCurveTo(-14, 2, -9, 5);
+  ctx.quadraticCurveTo(-4, 1, 0, 4);
+  ctx.quadraticCurveTo(4, 1, 9, 5);
+  ctx.quadraticCurveTo(14, 2, 20, -2-6*flap);
+  ctx.quadraticCurveTo(9, -7*flap-2, 0, 0);
+  ctx.fill();
+  ctx.restore();
+}
+
+let batsVisible = false;
+let t = 0;
+function loop(){
+  t += 1;
+  ctx.clearRect(0,0,CW,CH);
+
+  // --- drifting candy bars (far layer) ---
+  for(const c of candies){
+    c.x += c.vx*c.z; c.y += c.vy*c.z; c.rot += c.vr;
+    if(c.y < -40){ c.y = CH+40; c.x = Math.random()*CW; }
+    if(c.x < -60) c.x = CW+60; if(c.x > CW+60) c.x = -60;
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rot);
+    // fake 3D: squash width by cos of rotation
+    const sq = Math.abs(Math.cos(c.rot*1.3))*0.75 + 0.25;
+    ctx.globalAlpha = c.a;
+    ctx.fillStyle = '#8A5426';
+    ctx.fillRect(-c.w*sq/2, -c.w*1.9/2, c.w*sq, c.w*1.9);
+    ctx.fillStyle = '#E8C58A';
+    ctx.fillRect(-c.w*sq/2, -c.w*1.9/2, c.w*sq, 2);
+    ctx.restore();
+  }
+
+  // --- bats (slide 5 only) ---
+  if(batsVisible){
+    for(const b of bats){
+      b.x += b.vx; b.ph += b.sp;
+      if(b.x < -60) b.x = CW+60;
+      if(b.x > CW+60) b.x = -60;
+      drawBat(b);
+    }
+  }
+
+  // --- embers (near layer) ---
+  for(const p of embers){
+    p.y += p.vy*p.z*2.1;
+    p.x += p.vx*p.z + Math.sin(t*0.006 + p.tw)*0.22;
+    p.tw += 0.03;
+    if(p.y < -20){ p.y = CH+20; p.x = Math.random()*CW; }
+    if(p.x < -20) p.x = CW+20; if(p.x > CW+20) p.x = -20;
+    const tw = 0.62 + Math.sin(p.tw)*0.38;
+    const r = p.r*p.z;
+    ctx.globalAlpha = p.a*tw;
+    ctx.fillStyle = p.c;
+    ctx.shadowBlur = 14*p.z; ctx.shadowColor = p.c;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+
+  // --- confetti bursts ---
+  for(let i=confetti.length-1;i>=0;i--){
+    const c = confetti[i];
+    c.vy += c.g; c.x += c.vx; c.y += c.vy; c.rot += c.vr;
+    c.vx *= 0.993; c.life -= c.decay;
+    if(c.life <= 0 || c.y > CH+60){ confetti.splice(i,1); continue; }
+    ctx.save();
+    ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+    ctx.globalAlpha = Math.max(0, c.life);
+    ctx.fillStyle = c.c;
+    ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h*(0.4+Math.abs(Math.cos(c.rot))*0.6));
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+
+  requestAnimationFrame(loop);
+}
+
+resize();
+makeEmbers(window.innerWidth < 760 ? 48 : 110);
+makeCandies(window.innerWidth < 760 ? 6 : 14);
+makeBats(9);
+loop();
+
+/* mouse parallax on the fog + deck */
+let mx=0,my=0;
+document.addEventListener('mousemove', e=>{
+  mx = (e.clientX/window.innerWidth - .5);
+  my = (e.clientY/window.innerHeight - .5);
+  document.getElementById('deck').style.perspectiveOrigin =
+    (50 + mx*9) + '% ' + (45 + my*9) + '%';
+  document.getElementById('fog').style.transformOrigin =
+    (50 - mx*14) + '% ' + (50 - my*14) + '%';
+});
+
+/* ============================================================
+   3. SPEAKER NOTES  (each teammate's script)
+   ============================================================ */
+const NOTES = [
+  { who:'DIEGO · slide 1 of 3 · ~20 sec',
+    txt:`"Good morning. We are Diego, Adiel, and Oziel. We tested three candies — Kit Kat, Reese's Cups, and Sour Patch Kids — on flavor, texture, appearance, and Halloween appeal. Our claim is simple: <em>Kit Kat is the best Halloween candy.</em>"`,
+    tip:`Say the claim slowly — it's the one sentence the rubric grades hardest. Then press → .` },
+
+  { who:'DIEGO · slide 2 of 3 · ~20 sec',
+    txt:`"Here's what we found. Reese's has a strong, salty peanut butter flavor, but it's soft all the way through — one texture only — and it melts in a warm candy bag. Sour Patch Kids are fun and colorful, but they're sticky, and after three of them your mouth is done.
+
+Kit Kat was the only candy that scored high in <em>all four</em> categories. Here's our first reason why."`,
+    tip:`Point at the table while you speak. Do NOT read it out loud — the class can read faster than you can talk.` },
+
+  { who:'DIEGO · slide 3 of 3 · ~20 sec · then hand off to ADIEL',
+    txt:`"Reason one: <em>texture.</em> Every other candy in the top ten gives you one texture — soft, chewy, or hard. Kit Kat gives you two at the same time: a crisp wafer snap <em>and</em> smooth chocolate.
+
+According to Instacart's 2026 report, chocolate owns the first six spots of the top ten — and Kit Kat is the only crispy wafer bar in that group. It has no competition on texture.
+
+That's why you can eat four Kit Kats and still want more. Try that with Sour Patch Kids. <em>Adiel will take it from here.</em>"`,
+    tip:`The cross-section diagram does the work. Let it sit a beat before you talk. End by saying Adiel's name — the rubric watches for clean hand-offs.` },
+
+  { who:'ADIEL · slide 1 of 3 · ~20 sec · THE SNAP',
+    txt:`"Thank you, Diego. Reason two: <em>it's built to be shared.</em> Kit Kat is the only candy engineered to be divided — four fingers, no knife, no mess. One bar feeds four trick-or-treaters. You cannot split a Reese's Cup evenly.
+
+Halloween is a social holiday, and Hershey knows it: their 2026 Halloween line sells Kit Kat in 'breakaway shapes.' <em>The brand markets breaking and sharing as the whole point.</em>"`,
+    tip:`Press ENTER (or click the bar) to snap it apart right as you say "engineered to be divided." If you brought a real Kit Kat, break it here — it lands every time.` },
+
+  { who:'ADIEL · slide 2 of 3 · ~20 sec',
+    txt:`"Reason three: <em>Kit Kat owns Halloween.</em> For Halloween 2026, Hershey released 'Kit Kat Count and Witch' — the vampire Count came back, and this year he's joined by a brand-new Witch. They also launched 'Kit Kat Ghost Toast,' a limited cinnamon-toast flavor, in the Halloween All-Stars box.
+
+No other candy gets costumes. Reese's changes <em>shape</em>; Kit Kat changes <em>character</em>."`,
+    tip:`This is the reason judges remember. Deliver it with energy — it's the fun one.` },
+
+  { who:'ADIEL · slide 3 of 3 · ~25 sec · REQUIRED ARTICLE EVIDENCE',
+    txt:`"Now our article evidence. We read 'Reese's Peanut Butter Cups Named America's Favorite Halloween Candy Again in 2026,' published by AOL on September thirtieth, reporting Instacart's national data.
+
+The detail we chose: <em>chocolate claims the first six spots in the top ten, and Kit Kat is ranked sixth.</em>
+
+In our own words: sour and chewy candies are trending right now — but Americans <em>still</em> put chocolate in every single one of the top six spots. Kit Kat is inside that locked chocolate group. Out of hundreds of candies sold in this country, Kit Kat finishes ahead of <em>every</em> sour, gummy, and fruity candy there is. <em>Oziel will answer the objection.</em>"`,
+    tip:`SLOW DOWN. This slide is 5 of the 20 points. Make sure the teacher hears the article title, the date, and the link on screen. Then hand off to Oziel by name.` },
+
+  { who:'OZIEL · slide 1 of 2 · ~35 sec · THE COUNTERARGUMENT',
+    txt:`"Thank you, Adiel. Someone is going to push back, so let's say it ourselves: 'Kit Kat is only number six, and it dropped from number four last year. That means it's losing.'
+
+Three answers.
+<em>One:</em> number six out of hundreds of candies is elite. Kit Kat still beats Twix, Skittles, Sour Patch Kids, and every non-chocolate candy on that list.
+<em>Two:</em> look at the method. That ranking comes from Instacart grocery orders placed in October 2025. It measures what <em>adults bulk-buy online</em> — not what <em>kids actually want in the bag.</em>
+<em>Three:</em> two spots inside a crowded top ten is noise, not a trend. And Kit Kat is the only candy in the top ten that got a brand-new Halloween character this year. That's a brand <em>growing</em>, not shrinking."`,
+    tip:`Press ENTER to flip the cards one at a time as you hit each answer. Answer TWO is your strongest — hit it hard. Attacking the method is what separates you from every other group.` },
+
+  { who:'OZIEL · slide 2 of 2 · ~20 sec · THE CLOSE',
+    txt:`"So: best texture, best to share, best Halloween identity.
+<em>Reese's wins the grocery list. Kit Kat wins Halloween night.</em>
+Give Kit Kat the Crown. Thank you — what questions do you have?"
+
+<em>PREPARED ANSWERS:</em>
+
+<em>Q: "What about nut allergies — isn't that your real argument?"</em>
+A: We deliberately didn't build our case on allergies, because Kit Kat is made on shared equipment, so we can't promise it's allergy-safe. Our argument is texture, sharing, and Halloween identity — things we can prove.
+
+<em>Q: "Other surveys rank M&M's or Snickers first. Doesn't that beat your point?"</em>
+A: Rankings do disagree — CandyStore.com's 2026 survey of 3,200-plus customers put M&M's first nationally. That's why we never argued Kit Kat is number one in sales. We argued it's the best HALLOWEEN candy: unique texture, built to share, and the only one with its own Halloween characters. No survey ranks those.
+
+<em>Q: "Isn't 'it breaks into four pieces' a weak reason?"</em>
+A: It's the only functional advantage any candy on this list has. Halloween is about trading and sharing candy. A bar designed to split is designed for this holiday.
+
+<em>Q: "Kit Kat is just wafer and chocolate — isn't it boring?"</em>
+A: Simple isn't boring, it's why it doesn't burn you out. Sour Patch Kids are great for two pieces. Kit Kat is the one still in your bag on November 3rd that you WANT to eat.`,
+    tip:`Press ENTER on this slide to fire the confetti. End on "what questions do you have?" and STOP talking — let them ask.` }
+];
+
+/* ============================================================
+   4. DECK CONTROLLER
+   ============================================================ */
+const slides = Array.from(document.querySelectorAll('.slide'));
+const N = slides.length;
+let cur = 0;
+
+const dots = document.getElementById('dots');
+slides.forEach((_,i)=>{
+  const d = document.createElement('i');
+  d.addEventListener('click', ()=>go(i));
+  dots.appendChild(d);
+});
+const dotEls = Array.from(dots.children);
+
+const progress = document.getElementById('progress');
+const counter  = document.getElementById('counter');
+const notesEl  = document.getElementById('notes');
+const nTitle   = document.getElementById('notesTitle');
+const nBody    = document.getElementById('notesBody');
+const nTip     = document.getElementById('notesTip');
+
+function paintNotes(){
+  const n = NOTES[cur];
+  if(!n) return;
+  nTitle.textContent = n.who;
+  nBody.innerHTML = n.txt;
+  nTip.innerHTML = '💡 ' + n.tip;
+}
+
+function go(i){
+  if(i<0 || i>=N || i===cur) return;
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('past');
+  cur = i;
+  slides[cur].classList.remove('past');
+  slides[cur].classList.add('active');
+  // clean up the 'past' class on everything ahead of us
+  slides.forEach((s,k)=>{ if(k>cur) s.classList.remove('past'); });
+
+  dotEls.forEach((d,k)=>d.classList.toggle('on', k===cur));
+  progress.style.width = ((cur+1)/N*100) + '%';
+  counter.innerHTML = '<b>'+(cur+1)+'</b> / '+N;
+  batsVisible = (cur === 4);
+  paintNotes();
+
+  if(cur === 7) setTimeout(()=>burst(window.innerWidth/2, window.innerHeight*0.3, 110), 600);
+  if(cur === 3) bar4.classList.remove('snapped');
+  if(cur === 6) document.querySelectorAll('#s7 .flip').forEach(f=>f.classList.remove('flipped'));
+}
+
+/* ENTER = the "special effect" button for the current slide */
+let flipIdx = 0;
+function action(){
+  if(cur === 3){ toggleSnap(); return; }
+  if(cur === 6){
+    const fl = document.querySelectorAll('#s7 .flip');
+    if(flipIdx < fl.length){ fl[flipIdx].classList.add('flipped'); flipIdx++; }
+    else { fl.forEach(f=>f.classList.remove('flipped')); flipIdx = 0; }
+    return;
+  }
+  if(cur === 7){ burst(window.innerWidth/2, window.innerHeight*0.55, 90); return; }
+  next();
+}
+function next(){ go(cur+1); }
+function prev(){ go(cur-1); }
+
+document.querySelectorAll('#s7 .flip').forEach(f=>{
+  f.addEventListener('click', ()=>f.classList.toggle('flipped'));
+});
+document.querySelector('#s8 .crown').addEventListener('click', ()=>{
+  burst(window.innerWidth/2, window.innerHeight*0.3, 110);
+});
+
+/* ---- timer ---- */
+const timerEl = document.getElementById('timer');
+let tStart = null, tOn = false;
+setInterval(()=>{
+  if(!tOn || tStart===null) return;
+  const s = Math.floor((Date.now()-tStart)/1000);
+  timerEl.textContent = Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  timerEl.classList.toggle('good', s>=120 && s<=180);
+  timerEl.classList.toggle('over', s>180);
+}, 250);
+
+/* ---- keyboard ---- */
+document.addEventListener('keydown', e=>{
+  switch(e.key){
+    case 'ArrowRight': case 'PageDown': e.preventDefault(); next(); break;
+    case 'ArrowLeft':  case 'PageUp':   e.preventDefault(); prev(); break;
+    case ' ': case 'Enter': e.preventDefault(); action(); break;
+    case 'Home': go(0); break;
+    case 'End':  go(N-1); break;
+    case 'n': case 'N': notesEl.classList.toggle('on'); break;
+    case 'f': case 'F':
+      if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+      break;
+    case 't': case 'T':
+      if(!tOn){ tOn = true; tStart = Date.now(); timerEl.classList.add('on'); }
+      else { tOn = false; tStart = null; timerEl.classList.remove('on','good','over'); timerEl.textContent='0:00'; }
+      break;
+    case 'Escape': notesEl.classList.remove('on'); break;
+    default:
+      if(e.key >= '1' && e.key <= '8') go(parseInt(e.key,10)-1);
+  }
+});
+
+/* ---- click / swipe ---- */
+document.addEventListener('click', e=>{
+  if(e.target.closest('#notes, #dots, a, .flip, .bar, .crown, .card')) return;
+  if(e.clientX < window.innerWidth*0.18) prev(); else next();
+});
+let tx=0;
+document.addEventListener('touchstart', e=>{ tx = e.changedTouches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  const dx = e.changedTouches[0].clientX - tx;
+  if(Math.abs(dx) > 55){ dx < 0 ? next() : prev(); }
+}, {passive:true});
+
+/* ---- idle: hide the hint + cursor ---- */
+let idle;
+function wake(){
+  document.body.classList.remove('hide-cursor');
+  document.getElementById('hint').style.opacity = '1';
+  clearTimeout(idle);
+  idle = setTimeout(()=>{
+    document.body.classList.add('hide-cursor');
+    document.getElementById('hint').style.opacity = '0';
+  }, 3500);
+}
+document.addEventListener('mousemove', wake);
+document.addEventListener('keydown', wake);
+wake();
+
+/* ---- boot ---- */
+slides[0].classList.add('active');
+dotEls[0].classList.add('on');
+progress.style.width = (1/N*100)+'%';
+paintNotes();
+</script>
+</body>
+</html>
